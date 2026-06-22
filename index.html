@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GenMeme — GenLayer Meme Generator with Mochi</title>
+  <meta name="description" content="Create GenLayer memes with Mochi, the official mascot. Upload your PFP, pick a pose, generate shareable Web3 memes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #07191E;
+      --green: #02F5A1;
+      --w: #FFFFFF;
+      --w70: rgba(255,255,255,.70);
+      --w50: rgba(255,255,255,.50);
+      --w35: rgba(255,255,255,.35);
+      --line: rgba(255,255,255,.09);
+      --gline: rgba(2,245,161,.22);
+      --gfill: rgba(2,245,161,.05);
+      --disp: 'Space Grotesk', sans-serif;
+      --body: 'Inter', sans-serif;
+      --ease: cubic-bezier(.22,1,.36,1);
+    }
+    * , *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--w);
+      font-family: var(--body); font-size: 16px; line-height: 1.6;
+      overflow-x: hidden; -webkit-font-smoothing: antialiased;
+    }
+    /* flat grid backdrop (lines only, no gradient) */
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size: 72px 72px;
+    }
+    body > * { position: relative; z-index: 1; }
+    h1,h2,h3,h4 { font-family: var(--disp); font-weight: 700; letter-spacing: -.03em; color: var(--w); }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; }
+    ::selection { background: var(--green); color: var(--bg); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: rgba(2,245,161,.3); }
+
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+
+    /* ── KICKER / SECTION LABEL ── */
+    .kicker {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: var(--body); font-size: 11px; font-weight: 700;
+      letter-spacing: .22em; text-transform: uppercase; color: var(--w70);
+    }
+    .kicker .sq { width: 8px; height: 8px; background: var(--green); }
+    .sec-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 40px; flex-wrap: wrap; }
+    .sec-num { font-family: var(--disp); font-size: 13px; font-weight: 500; color: var(--w35); letter-spacing: .1em; }
+
+    /* ── BUTTONS (sharp, flat) ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+      font-family: var(--body); font-size: 13px; font-weight: 700;
+      letter-spacing: .04em; text-transform: uppercase;
+      padding: 14px 24px; border: 1px solid transparent;
+      transition: background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), transform .25s var(--ease);
+    }
+    .btn svg { transition: transform .25s var(--ease); }
+    .btn-p { background: var(--green); color: var(--bg); }
+    .btn-p:hover { transform: translateY(-2px); }
+    .btn-p:hover svg { transform: translateX(3px); }
+    .btn-o { background: transparent; color: var(--w); border-color: var(--line); }
+    .btn-o:hover { border-color: var(--green); }
+    .btn-o:hover svg { transform: translateX(3px); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 72px;
+      display: flex; align-items: center;
+      background: rgba(7,25,30,0); border-bottom: 1px solid transparent;
+      transition: background .3s var(--ease), border-color .3s var(--ease);
+    }
+    nav.scrolled { background: rgba(7,25,30,.85); backdrop-filter: blur(14px); border-bottom-color: var(--line); }
+    .nav-in { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .brand { display: flex; align-items: center; gap: 11px; font-family: var(--disp); font-weight: 700; font-size: 19px; letter-spacing: -.02em; color: var(--w); }
+    .brand .mark { width: 18px; height: 18px; background: var(--green); }
+    .nav-links { display: flex; align-items: center; gap: 34px; }
+    .nav-links a.lnk { position: relative; font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--w70); transition: color .2s; }
+    .nav-links a.lnk::after { content:''; position:absolute; left:0; bottom:-6px; height:1px; width:0; background: var(--green); transition: width .28s var(--ease); }
+    .nav-links a.lnk:hover { color: var(--w); }
+    .nav-links a.lnk:hover::after { width: 100%; }
+
+    /* ── HERO ── */
+    .hero { padding: 132px 0 64px; }
+    .hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items: center; }
+    .hero h1 {
+      font-size: clamp(44px, 6.4vw, 92px); line-height: .94; letter-spacing: -.045em;
+      margin: 22px 0 26px; text-transform: uppercase;
+    }
+    .hero h1 .ln { display: block; overflow: hidden; }
+    .hero h1 .ln > span { display: block; transform: translateY(110%); transition: transform .9s var(--ease); }
+    .hero.ready h1 .ln > span { transform: translateY(0); }
+    .hero h1 .ln:nth-child(2) > span { transition-delay: .08s; }
+    .hero h1 .ln:nth-child(3) > span { transition-delay: .16s; }
+    .hero .lead { font-size: 17px; line-height: 1.65; color: var(--w70); max-width: 440px; margin-bottom: 34px; }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-stats { display: flex; gap: 0; margin-top: 46px; border-top: 1px solid var(--line); }
+    .hero-stats .st { padding: 22px 28px 0 0; margin-right: 28px; border-right: 1px solid var(--line); }
+    .hero-stats .st:last-child { border-right: none; }
+    .hero-stats .num { font-family: var(--disp); font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -.03em; }
+    .hero-stats .cap { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--w35); margin-top: 8px; }
+
+    /* hero visual — bordered frame, no glow */
+    .hero-frame { position: relative; border: 1px solid var(--gline); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+    .hero-frame::before, .hero-frame::after { content:''; position:absolute; width:13px; height:13px; border:2px solid var(--green); }
+    .hero-frame::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+    .hero-frame::after { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+    .hero-frame img { width: 74%; height: 74%; object-fit: contain; }
+    .hero-tag { position: absolute; top: 16px; right: 16px; border: 1px solid var(--gline); background: var(--bg); padding: 7px 12px; font-family: var(--disp); font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+    .hero-corner-lbl { position: absolute; bottom: 14px; left: 16px; font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--w35); }
+    .float { animation: float 5s ease-in-out infinite; }
+    @keyframes float { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-12px) } }
+
+    /* ── MARQUEE ── */
+    .marquee { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow: hidden; padding: 16px 0; }
+    .marquee-track { display: flex; white-space: nowrap; width: max-content; animation: scroll 28s linear infinite; }
+    .marquee-track span { font-family: var(--disp); font-size: 15px; font-weight: 600; letter-spacing: .04em; color: var(--w); display: inline-flex; align-items: center; }
+    .marquee-track .dot { width: 6px; height: 6px; background: var(--green); margin: 0 26px; flex-shrink: 0; }
+    @keyframes scroll { to { transform: translateX(-50%); } }
+
+    /* ── SECTION ── */
+    section.blk { padding: 80px 0; border-top: 1px solid var(--line); }
+
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* ── GENERATOR ── */
+    .gen-grid { display: grid; grid-template-columns: 1fr 408px; gap: 28px; align-items: start; }
+    .step { border: 1px solid var(--line); }
+    .step-top { display: flex; align-items: center; gap: 16px; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+    .step-no { width: 34px; height: 34px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--green); color: var(--bg); font-family: var(--disp); font-weight: 700; font-size: 15px; }
+    .step-title { font-family: var(--disp); font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+    .step-sub { font-size: 12px; color: var(--w35); margin-top: 2px; }
+    .step-body { padding: 22px; }
+    .step + .step { border-top: none; }
+
+    .drop { border: 1px dashed var(--gline); padding: 38px 20px; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+    .drop:hover, .drop.on { border-color: var(--green); background: var(--gfill); }
+    .drop .ic { width: 52px; height: 52px; border: 1px solid var(--gline); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
+    .drop .t1 { font-family: var(--disp); font-size: 15px; font-weight: 600; }
+    .drop .t2 { font-size: 12px; color: var(--w35); margin-top: 5px; }
+
+    .mgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .mtile { aspect-ratio: 1; border: 1px solid var(--line); cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; transition: border-color .2s, background .2s; }
+    .mtile img { width: 100%; height: 100%; object-fit: contain; padding: 7px; }
+    .mtile:hover { border-color: var(--gline); background: var(--gfill); }
+    .mtile.sel { border-color: var(--green); background: var(--gfill); }
+    .mtile.sel::after { content:''; position:absolute; top:4px; right:4px; width:7px; height:7px; background: var(--green); }
+
+    .tgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .ttile { border: 1px solid var(--line); padding: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: border-color .2s, background .2s; }
+    .ttile:hover { border-color: var(--gline); }
+    .ttile.sel { border-color: var(--green); background: var(--gfill); }
+    .ttile .tt { font-family: var(--disp); font-size: 13px; font-weight: 600; }
+    .ttile .td { font-size: 11px; color: var(--w35); margin-top: 2px; }
+
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: block; font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--w50); margin-bottom: 7px; }
+    .field input {
+      width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--line);
+      color: var(--w); font-family: var(--body); font-size: 15px; padding: 8px 0; outline: none;
+      transition: border-color .2s;
+    }
+    .field input:focus { border-bottom-color: var(--green); }
+    .field input::placeholder { color: var(--w35); }
+
+    .ghost-btn { display: inline-flex; align-items: center; gap: 7px; background: transparent; border: 1px solid var(--line); color: var(--w); font-family: var(--body); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 8px 13px; cursor: pointer; transition: border-color .2s; }
+    .ghost-btn:hover { border-color: var(--green); }
+
+    /* preview panel */
+    .preview { position: sticky; top: 92px; border: 1px solid var(--gline); }
+    .pv-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--gline); }
+    .pv-top .lbl { font-family: var(--disp); font-size: 12px; font-weight: 600; letter-spacing: .08em; }
+    .pv-top .st { display: flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--w50); }
+    .pv-top .st .dot { width: 7px; height: 7px; background: var(--green); animation: blink 1.6s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{ opacity: 1 } 50%{ opacity: .25 } }
+    .pv-canvas { padding: 16px; }
+    #meme-canvas { width: 100%; height: auto; display: block; border: 1px solid var(--line); }
+    .pv-actions { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .pv-actions .btn { width: 100%; justify-content: center; }
+    .x-btn { display: flex; align-items: center; justify-content: center; gap: 9px; border: 1px solid var(--line); color: var(--w); font-family: var(--body); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 12px; cursor: pointer; transition: border-color .2s; }
+    .x-btn:hover { border-color: var(--green); }
+
+    /* ── PROCESS ── */
+    .proc { display: grid; grid-template-columns: repeat(3, 1fr); }
+    .proc .pcol { padding: 30px 26px 30px 0; border-right: 1px solid var(--line); }
+    .proc .pcol:last-child { border-right: none; padding-right: 0; }
+    .proc .pn { font-family: var(--disp); font-size: 13px; font-weight: 600; letter-spacing: .1em; color: var(--green); margin-bottom: 22px; }
+    .proc .pic { width: 44px; height: 44px; margin-bottom: 22px; }
+    .proc h3 { font-size: 21px; margin-bottom: 11px; letter-spacing: -.02em; }
+    .proc p { font-size: 14px; color: var(--w70); line-height: 1.7; }
+
+    /* ── ABOUT ── */
+    .about-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+    .about h2 { font-size: clamp(30px, 4vw, 50px); line-height: .98; text-transform: uppercase; margin: 18px 0 22px; }
+    .about p { font-size: 15px; color: var(--w70); line-height: 1.8; margin-bottom: 16px; }
+    .about p strong { color: var(--w); font-weight: 700; }
+    .stack { border-top: 1px solid var(--line); margin: 26px 0 30px; }
+    .stack .row { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .stack .row .k { font-family: var(--disp); font-size: 15px; font-weight: 600; width: 110px; flex-shrink: 0; }
+    .stack .row .v { font-size: 14px; color: var(--w70); }
+    .stack .row.hl .sq { width: 8px; height: 8px; background: var(--green); flex-shrink: 0; }
+    .stack .row .sq { width: 8px; height: 8px; background: var(--w35); flex-shrink: 0; }
+    .about-frame { border: 1px solid var(--gline); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+    .about-frame img { width: 70%; height: 70%; object-fit: contain; }
+    .about-frame::before, .about-frame::after { content:''; position:absolute; width:13px; height:13px; border:2px solid var(--green); }
+    .about-frame::before { top:-1px; right:-1px; border-left:none; border-bottom:none; }
+    .about-frame::after { bottom:-1px; left:-1px; border-right:none; border-top:none; }
+
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--line); padding: 56px 0 0; }
+    .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 44px; margin-bottom: 48px; }
+    .foot p.desc { font-size: 13px; color: var(--w50); line-height: 1.75; max-width: 290px; margin: 14px 0 20px; }
+    .socials { display: flex; gap: 9px; }
+    .socials a { width: 38px; height: 38px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--w70); transition: border-color .2s, color .2s; }
+    .socials a:hover { border-color: var(--green); color: var(--w); }
+    .foot h4 { font-family: var(--body); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--w50); margin-bottom: 16px; }
+    .foot .flinks { display: flex; flex-direction: column; gap: 11px; }
+    .foot .flinks a { font-size: 13px; color: var(--w70); transition: color .2s; width: fit-content; }
+    .foot .flinks a:hover { color: var(--w); }
+    .bigmark { font-family: var(--disp); font-weight: 700; font-size: clamp(48px, 13vw, 168px); line-height: .8; letter-spacing: -.05em; text-transform: uppercase; color: var(--w); border-top: 1px solid var(--line); padding-top: 28px; overflow: hidden; white-space: nowrap; }
+    .foot-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 22px 0 28px; }
+    .foot-bottom p { font-size: 11px; color: var(--w35); }
+    .foot-bottom .wagmi { font-family: var(--disp); font-size: 12px; font-weight: 600; letter-spacing: .1em; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .float { animation: none; }
+      .marquee-track { animation: none; }
+      .reveal { opacity: 1; transform: none; }
+      .hero h1 .ln > span { transform: none; }
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+      .hero-visual { max-width: 380px; }
+      .gen-grid { grid-template-columns: 1fr; }
+      .preview { position: static; }
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      .about-frame { max-width: 380px; }
+      .proc { grid-template-columns: 1fr; }
+      .proc .pcol { border-right: none; border-bottom: 1px solid var(--line); padding: 26px 0; }
+      .proc .pcol:last-child { border-bottom: none; }
+      .foot-grid { grid-template-columns: 1fr; gap: 32px; }
+    }
+    @media (max-width: 620px) {
+      .nav-links a.lnk { display: none; }
+      .hero h1 { font-size: 46px; }
+      .mgrid { grid-template-columns: repeat(4, 1fr); }
+      .hero-stats .st { padding-right: 18px; margin-right: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="wrap nav-in">
+    <a href="#" class="brand"><span class="mark"></span>GENMEME</a>
+    <div class="nav-links">
+      <a href="#generator" class="lnk">Generator</a>
+      <a href="#process" class="lnk">Process</a>
+      <a href="#about" class="lnk">About</a>
+      <a href="#generator" class="btn btn-p" style="padding:10px 18px;">Create Meme
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="kicker"><span class="sq"></span>Meme Engine — V1</div>
+      <h1>
+        <span class="ln"><span>Create</span></span>
+        <span class="ln"><span>GenLayer Memes</span></span>
+        <span class="ln"><span>With Mochi</span></span>
+      </h1>
+      <p class="lead">Upload your PFP, choose your favorite pose of Mochi — GenLayer's official mascot — and ship a shareable Web3 meme in seconds.</p>
+      <div class="hero-cta">
+        <a href="#generator" class="btn btn-p">Start Generating
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+        <a href="https://genlayer.com" target="_blank" rel="noopener" class="btn btn-o">Explore GenLayer
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 17L17 7"/><polyline points="7 7 17 7 17 17"/></svg>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="st"><div class="num" data-count="4">0</div><div class="cap">Templates</div></div>
+        <div class="st"><div class="num" data-count="9">0</div><div class="cap">Mochi Poses</div></div>
+        <div class="st"><div class="num">Free</div><div class="cap">Forever</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-frame">
+        <img class="float" alt="Mochi — GenLayer mascot" decoding="async" fetchpriority="high"
+          src="https://wsrv.nl/?url=raw.githubusercontent.com/genlayer-foundation/genlayer-mascot/main/assets/renders/mochi-main.png&w=900&output=webp&q=82" />
+        <div class="hero-tag">#GenLayer</div>
+        <div class="hero-corner-lbl">Official Mascot</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="mq">
+    <!-- filled by JS, duplicated for seamless loop -->
+  </div>
+</div>
+
+<!-- GENERATOR -->
+<section class="blk" id="generator">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker"><span class="sq"></span>Generator</div>
+        <h2 style="font-size:clamp(28px,3.6vw,44px);text-transform:uppercase;margin-top:14px;">Build Your Meme</h2>
+      </div>
+      <div class="sec-num">01 / 03</div>
+    </div>
+
+    <div class="gen-grid">
+      <!-- STEPS -->
+      <div>
+        <!-- STEP 1 -->
+        <div class="step reveal">
+          <div class="step-top">
+            <div class="step-no">1</div>
+            <div><div class="step-title">Upload Your PFP</div><div class="step-sub">PNG · JPG · GIF · WEBP</div></div>
+          </div>
+          <div class="step-body">
+            <div id="pfp-zone" class="drop" onclick="document.getElementById('pfp-file').click()">
+              <input type="file" id="pfp-file" accept="image/*" style="display:none" />
+              <div id="pfp-ph">
+                <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#02F5A1" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                <div class="t1">Drop your PFP here</div>
+                <div class="t2">or click to browse</div>
+              </div>
+              <div id="pfp-prev" style="display:none;flex-direction:column;align-items:center;gap:12px;">
+                <img id="pfp-thumb" alt="PFP preview" style="width:92px;height:92px;object-fit:cover;border:1px solid var(--green);" />
+                <div style="font-family:var(--disp);font-size:13px;font-weight:600;">PFP Loaded</div>
+                <button class="ghost-btn" onclick="clearPFP(event)">Change</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step reveal">
+          <div class="step-top">
+            <div class="step-no">2</div>
+            <div><div class="step-title">Choose Mochi Pose</div><div class="step-sub">Official mascot collection</div></div>
+          </div>
+          <div class="step-body">
+            <div id="mochi-grid" class="mgrid"></div>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+              <span style="font-size:12px;color:var(--w35);">Use your own Mochi image</span>
+              <input type="file" id="custom-mochi-file" accept="image/*" style="display:none" />
+              <button class="ghost-btn" onclick="document.getElementById('custom-mochi-file').click()">Upload Custom</button>
+            </div>
+            <div id="custom-mochi-name" style="font-size:12px;color:var(--w50);margin-top:8px;"></div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step reveal">
+          <div class="step-top">
+            <div class="step-no">3</div>
+            <div><div class="step-title">Pick Template</div><div class="step-sub">Choose your meme format</div></div>
+          </div>
+          <div class="step-body"><div id="tmpl-grid" class="tgrid"></div></div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step reveal">
+          <div class="step-top">
+            <div class="step-no">4</div>
+            <div><div class="step-title">Add Caption</div><div class="step-sub">Optional — make it yours</div></div>
+          </div>
+          <div class="step-body">
+            <div class="field"><label>Main Caption</label><input id="cap1" type="text" maxlength="60" placeholder="GM SER · WAGMI · OPTIMISTIC DEMOCRACY" /></div>
+            <div class="field"><label>Sub-caption</label><input id="cap2" type="text" maxlength="80" placeholder="when GenLayer reaches consensus…" /></div>
+            <div class="field"><label>Your Handle</label><input id="cap3" type="text" maxlength="30" placeholder="@yourhandle" /></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="preview">
+        <div class="pv-top">
+          <span class="lbl">Live Preview</span>
+          <span class="st"><span class="dot"></span><span id="rstatus">READY</span></span>
+        </div>
+        <div class="pv-canvas"><canvas id="meme-canvas" width="1080" height="1080"></canvas></div>
+        <div class="pv-actions">
+          <button class="btn btn-p" onclick="dlMeme()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download · 1080×1080
+          </button>
+          <button class="btn btn-p" id="copy-btn" onclick="cpMeme()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy to Clipboard
+          </button>
+          <button class="btn btn-p" onclick="tweetIt(event)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.629L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Share on X
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="blk" id="process">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div>
+        <div class="kicker"><span class="sq"></span>Process</div>
+        <h2 style="font-size:clamp(28px,3.6vw,44px);text-transform:uppercase;margin-top:14px;">Three Moves To Glory</h2>
+      </div>
+      <div class="sec-num">02 / 03</div>
+    </div>
+    <div class="proc">
+      <div class="pcol reveal">
+        <div class="pn">/ 01</div>
+        <svg class="pic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <h3>Upload Your PFP</h3>
+        <p>Drag &amp; drop or browse your profile picture. Any format, any size — it gets cropped clean.</p>
+      </div>
+      <div class="pcol reveal">
+        <div class="pn">/ 02</div>
+        <svg class="pic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <h3>Compose Layout</h3>
+        <p>Pick from nine official Mochi poses and four meme templates. The preview rebuilds instantly as you go.</p>
+      </div>
+      <div class="pcol reveal">
+        <div class="pn">/ 03</div>
+        <svg class="pic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        <h3>Export &amp; Share</h3>
+        <p>Download a crisp 1080×1080 PNG and drop it on X, Discord or Telegram — wherever the community lives.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="blk about" id="about">
+  <div class="wrap">
+    <div class="sec-head reveal" style="margin-bottom:36px;">
+      <div class="kicker"><span class="sq"></span>About</div>
+      <div class="sec-num">03 / 03</div>
+    </div>
+    <div class="about-grid">
+      <div class="reveal">
+        <h2>The Adjudication Layer For The Agentic Economy</h2>
+        <p>GenLayer is the first AI-native blockchain built for <strong>Intelligent Contracts</strong> — smart contracts that reason, process unstructured data, and pull live web inputs. No oracles, no intermediaries.</p>
+        <p>Its <strong>Optimistic Democracy</strong> consensus connects validators directly to LLMs, delivering trustless adjudication at scale.</p>
+        <div class="stack">
+          <div class="row"><span class="sq"></span><span class="k">Bitcoin</span><span class="v">Trustless Money</span></div>
+          <div class="row"><span class="sq"></span><span class="k">Ethereum</span><span class="v">Trustless Computation</span></div>
+          <div class="row hl"><span class="sq"></span><span class="k">GenLayer</span><span class="v">Trustless Adjudication</span></div>
+        </div>
+        <a href="https://docs.genlayer.com" target="_blank" rel="noopener" class="btn btn-p">Read The Docs
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <div class="reveal" style="display:flex;justify-content:center;">
+        <div class="about-frame" style="width:100%;">
+          <img alt="Mochi chilling" decoding="async"
+            src="https://wsrv.nl/?url=raw.githubusercontent.com/genlayer-foundation/genlayer-mascot/main/assets/concept-art/mochi-chilling-pose.png&w=900&output=webp&q=82" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot">
+        <a href="#" class="brand"><span class="mark"></span>GENMEME</a>
+        <p class="desc">Community meme generator for the GenLayer ecosystem. Mochi mascot by GenLayer Foundation. MIT Licensed.</p>
+        <div class="socials">
+          <a href="https://discord.gg/8Jm4v89VAu" target="_blank" rel="noopener" aria-label="Discord"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 00-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 00-5.487 0 12.36 12.36 0 00-.617-1.23A.077.077 0 008.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 00-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 00.031.055 20.03 20.03 0 005.993 2.98.078.078 0 00.084-.026 13.83 13.83 0 001.226-1.963.074.074 0 00-.041-.104 13.175 13.175 0 01-1.872-.878.075.075 0 01-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 01.078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 01.079.009c.12.098.245.195.372.288a.075.075 0 01-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 00-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 00.084.028 19.963 19.963 0 006.002-2.981.076.076 0 00.032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 00-.031-.028zM8.02 15.278c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></a>
+          <a href="https://t.me/genlayer" target="_blank" rel="noopener" aria-label="Telegram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+          <a href="https://x.com/GenLayer" target="_blank" rel="noopener" aria-label="X"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.629L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+          <a href="https://github.com/genlayer-foundation" target="_blank" rel="noopener" aria-label="GitHub"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+        </div>
+      </div>
+      <div class="foot">
+        <h4>GenLayer</h4>
+        <div class="flinks">
+          <a href="https://genlayer.com" target="_blank" rel="noopener">Website</a>
+          <a href="https://docs.genlayer.com" target="_blank" rel="noopener">Documentation</a>
+          <a href="https://skills.genlayer.com" target="_blank" rel="noopener">GenLayer Skills</a>
+          <a href="https://github.com/genlayer-foundation/genlayer-mascot" target="_blank" rel="noopener">Mochi Mascot</a>
+        </div>
+      </div>
+      <div class="foot">
+        <h4>Community</h4>
+        <div class="flinks">
+          <a href="https://discord.gg/8Jm4v89VAu" target="_blank" rel="noopener">Discord</a>
+          <a href="https://t.me/genlayer" target="_blank" rel="noopener">Telegram</a>
+          <a href="https://x.com/GenLayer" target="_blank" rel="noopener">X / Twitter</a>
+        </div>
+      </div>
+    </div>
+    <div class="bigmark">GENMEME</div>
+    <div class="foot-bottom">
+      <p>© 2026 GenMeme · Community project · Mochi by GenLayer Foundation</p>
+      <p class="wagmi">WAGMI</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── STATE ───────────────────────────────────────────────────────────
+const W = 1080, H = 1080;
+let pfpImg = null, selMochi = 0, selTmpl = 'side', fontsOk = false;
+let cap1 = '', cap2 = '', cap3 = '';
+
+const MB = 'https://raw.githubusercontent.com/genlayer-foundation/genlayer-mascot/main/assets/';
+const MOCHILIST = [
+  { label:'Main',        src: MB+'renders/mochi-main.png' },
+  { label:'Clean',       src: MB+'renders/mochi-main-no-outline.png' },
+  { label:'Chilling',    src: MB+'concept-art/mochi-chilling-pose.png' },
+  { label:'Concept',     src: MB+'concept-art/mochi-concept-art.png' },
+  { label:'Love',        src: MB+'stickers/mochi-sticker-love.png' },
+  { label:'Stonks Up',   src: MB+'stickers/mochi-sticker-stonks-up.png' },
+  { label:'Idea',        src: MB+'stickers/mochi-sticker-idea.png' },
+  { label:'Cookie',      src: MB+'stickers/mochi-sticker-cookie.png' },
+  { label:'Stonks Down', src: MB+'stickers/mochi-sticker-stonks-down.png' },
+];
+const TMPLS = [
+  { id:'side', label:'Side by Side', desc:'You & Mochi, equals' },
+  { id:'cert', label:'Certified',    desc:'Certified believer' },
+  { id:'gm',   label:'GM Ser',       desc:'Morning crypto greeting' },
+  { id:'when', label:'When…',        desc:'Reaction meme' },
+];
+const mochiCache = {};
+// resized WebP thumbnails via image CDN — load instantly instead of the 4000×4000 originals
+const thumb = (url, w) => 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&w=' + w + '&output=webp&q=80';
+const GREEN = '#02F5A1', ONYX = '#07191E', WHITE = '#FFFFFF';
+const DISP = 'Space Grotesk', BODY = 'Inter';
+
+const canvas = document.getElementById('meme-canvas');
+const ctx = canvas.getContext('2d');
+
+// ── HELPERS ──────────────────────────────────────────────────────────
+function ldImg(src) {
+  return new Promise(res => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => res(img); img.onerror = () => res(null); img.src = src;
+  });
+}
+function contain(c, img, x, y, w, h) {
+  if (!img) return;
+  const s = Math.min(w/img.width, h/img.height);
+  const nw = img.width*s, nh = img.height*s;
+  c.drawImage(img, x+(w-nw)/2, y+(h-nh)/2, nw, nh);
+}
+function clipCircle(c, img, cx, cy, r) {
+  c.save(); c.beginPath(); c.arc(cx, cy, r, 0, Math.PI*2); c.closePath(); c.clip();
+  if (img) {
+    const s = Math.max(r*2/img.width, r*2/img.height);
+    const nw = img.width*s, nh = img.height*s;
+    c.drawImage(img, cx-nw/2, cy-nh/2, nw, nh);
+  } else {
+    c.fillStyle = 'rgba(2,245,161,0.06)'; c.fillRect(cx-r, cy-r, r*2, r*2);
+    c.font = `700 ${r*.38}px ${DISP}`; c.fillStyle = 'rgba(2,245,161,0.55)';
+    c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('PFP', cx, cy);
+  }
+  c.restore();
+}
+function wrapText(c, text, x, y, maxW, lh) {
+  const words = text.split(' '); let line = ''; const lines = [];
+  for (const w of words) {
+    const t = line ? line+' '+w : w;
+    if (c.measureText(t).width > maxW && line) { lines.push(line); line = w; }
+    else line = t;
+  }
+  if (line) lines.push(line);
+  lines.forEach((l, i) => c.fillText(l, x, y + i*lh));
+  return lines.length;
+}
+function drawBg() {
+  ctx.fillStyle = ONYX; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)'; ctx.lineWidth = 1;
+  for (let i=0;i<=W;i+=72){ ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke(); }
+  for (let i=0;i<=H;i+=72){ ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke(); }
+  // outer frame
+  ctx.strokeStyle = 'rgba(2,245,161,0.22)'; ctx.lineWidth = 2;
+  ctx.strokeRect(20,20,W-40,H-40);
+}
+function corner(x, y, dx, dy) {
+  const s = 26; ctx.strokeStyle = GREEN; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(x, y+dy*s); ctx.lineTo(x, y); ctx.lineTo(x+dx*s, y); ctx.stroke();
+}
+function drawWM() {
+  ctx.save();
+  ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+  ctx.font = `700 22px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText('GENMEME', W-44, H-44);
+  ctx.restore();
+}
+
+// ── TEMPLATES (flat, no glow/shadow) ─────────────────────────────────
+function tSide() {
+  drawBg();
+  const mochi = mochiCache[selMochi];
+  const hasBar = cap1 || cap2;
+  const cH = hasBar ? H-180 : H-44;
+  const half = W/2;
+  ctx.strokeStyle = 'rgba(2,245,161,0.28)'; ctx.lineWidth = 2; ctx.setLineDash([10,8]);
+  ctx.beginPath(); ctx.moveTo(half, 60); ctx.lineTo(half, cH-30); ctx.stroke(); ctx.setLineDash([]);
+
+  const pfpCX = half/2, pfpCY = cH/2, pfpR = Math.min(half/2-72, cH/2-72);
+  clipCircle(ctx, pfpImg, pfpCX, pfpCY, pfpR);
+  ctx.strokeStyle = GREEN; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR,0,Math.PI*2); ctx.stroke();
+  if (cap3) { ctx.font = `600 22px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle=WHITE; ctx.fillText(cap3, pfpCX, pfpCY+pfpR+20); }
+
+  contain(ctx, mochi, half+34, 60, half-86, cH-120);
+
+  if (hasBar) {
+    ctx.strokeStyle = 'rgba(2,245,161,0.28)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(40, cH); ctx.lineTo(W-40, cH); ctx.stroke();
+    const mid = cH + (H-cH)/2; ctx.textAlign='center'; ctx.textBaseline='middle';
+    if (cap1 && cap2) {
+      ctx.font = `700 46px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText(cap1.toUpperCase(), W/2, mid-26);
+      ctx.font = `500 27px ${BODY}`; ctx.fillStyle = WHITE; ctx.fillText(cap2, W/2, mid+28);
+    } else if (cap1) {
+      ctx.font = `700 54px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText(cap1.toUpperCase(), W/2, mid);
+    } else {
+      ctx.font = `500 32px ${BODY}`; ctx.fillStyle = WHITE; ctx.fillText(cap2, W/2, mid);
+    }
+  }
+  corner(20,20,1,1); corner(W-20,20,-1,1); corner(20,H-20,1,-1); corner(W-20,H-20,-1,-1);
+  drawWM();
+}
+
+function tCert() {
+  drawBg();
+  const mochi = mochiCache[selMochi];
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.font = `700 92px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText('CERTIFIED', W/2, 70);
+  ctx.font = `500 34px ${BODY}`; ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillText(cap1 || 'GenLayer Believer', W/2, 178);
+
+  const pfpCX = W/2-92, pfpCY = H/2+34, pfpR = 198;
+  ctx.strokeStyle = 'rgba(2,245,161,0.22)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR+18,0,Math.PI*2); ctx.stroke();
+  clipCircle(ctx, pfpImg, pfpCX, pfpCY, pfpR);
+  ctx.strokeStyle = GREEN; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR,0,Math.PI*2); ctx.stroke();
+  // check badge (flat)
+  const bx = pfpCX+pfpR*.72, by = pfpCY+pfpR*.72, br = 60;
+  ctx.fillStyle = GREEN; ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle = ONYX; ctx.lineWidth = 8; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(bx-25,by); ctx.lineTo(bx-8,by+18); ctx.lineTo(bx+25,by-18); ctx.stroke(); ctx.lineCap='butt';
+  if (cap3) { ctx.font = `600 23px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fillText(cap3, pfpCX, pfpCY+pfpR+22); }
+  contain(ctx, mochi, pfpCX+pfpR+14, pfpCY-210, 320, 420);
+  if (cap2) { ctx.font = `500 27px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fillText(cap2, W/2, H-44); }
+  corner(20,20,1,1); corner(W-20,20,-1,1); corner(20,H-20,1,-1); corner(W-20,H-20,-1,-1);
+  drawWM();
+}
+
+function tGM() {
+  drawBg();
+  const mochi = mochiCache[selMochi];
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.font = `700 132px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText('GM', 72, 76);
+  ctx.font = `700 80px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText('SER', 72, 214);
+  ctx.fillStyle = GREEN; ctx.fillRect(72, 330, 120, 8);
+  if (cap1) { ctx.font = `500 33px ${BODY}`; ctx.fillStyle = 'rgba(255,255,255,0.72)'; wrapText(ctx, cap1, 72, 360, 480, 46); }
+  contain(ctx, mochi, W/2+30, 110, W/2-70, 660);
+
+  const pfpR = 86, pfpCX = pfpR+72, pfpCY = H-pfpR-86;
+  clipCircle(ctx, pfpImg, pfpCX, pfpCY, pfpR);
+  ctx.strokeStyle = GREEN; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR,0,Math.PI*2); ctx.stroke();
+  if (cap3) { ctx.font = `600 23px ${BODY}`; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillStyle=WHITE; ctx.fillText(cap3, pfpCX+pfpR+16, pfpCY); }
+  if (cap2) { ctx.font = `500 27px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fillText(cap2, W/2, H-44); }
+  corner(20,20,1,1); corner(W-20,20,-1,1); corner(20,H-20,1,-1); corner(W-20,H-20,-1,-1);
+  drawWM();
+}
+
+function tWhen() {
+  drawBg();
+  const mochi = mochiCache[selMochi];
+  const topH = 168;
+  ctx.strokeStyle = 'rgba(2,245,161,0.28)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(40, topH); ctx.lineTo(W-40, topH); ctx.stroke();
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const txt = 'WHEN ' + (cap1 ? cap1.toUpperCase() : '[ ADD CAPTION ]');
+  let fs = 48; ctx.font = `700 ${fs}px ${DISP}`;
+  while (ctx.measureText(txt).width > W-110 && fs > 24) { fs -= 2; ctx.font = `700 ${fs}px ${DISP}`; }
+  ctx.fillStyle = WHITE; ctx.fillText(txt, W/2, topH/2+10);
+
+  const botH = cap2 ? 128 : 60;
+  contain(ctx, mochi, 80, topH+24, W-160, H-topH-botH-44);
+
+  const pfpR = 66, pfpCX = W-pfpR-56, pfpCY = H-pfpR-56;
+  clipCircle(ctx, pfpImg, pfpCX, pfpCY, pfpR);
+  ctx.strokeStyle = GREEN; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR,0,Math.PI*2); ctx.stroke();
+  if (cap3) { ctx.font = `500 18px ${BODY}`; ctx.textAlign='right'; ctx.textBaseline='bottom'; ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.fillText(cap3, pfpCX-pfpR-12, pfpCY+6); }
+  if (cap2) {
+    const by = H-botH;
+    ctx.strokeStyle = 'rgba(2,245,161,0.28)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(40, by); ctx.lineTo(W-40, by); ctx.stroke();
+    ctx.font = `500 29px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle = WHITE; ctx.fillText(cap2, W/2-56, by+botH/2);
+  }
+  corner(20,20,1,1); corner(W-20,20,-1,1); corner(20,H-20,1,-1); corner(W-20,H-20,-1,-1);
+  drawWM();
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────
+let rendering = false;
+async function render() {
+  if (rendering) return; rendering = true;
+  const stEl = document.getElementById('rstatus'); stEl.textContent = 'RENDERING';
+  await ensureFonts();
+  if (!mochiCache[selMochi]) mochiCache[selMochi] = await ldImg(MOCHILIST[selMochi].src);
+  ({ side:tSide, cert:tCert, gm:tGM, when:tWhen }[selTmpl] || tSide)();
+  stEl.textContent = 'READY'; rendering = false;
+}
+async function ensureFonts() {
+  if (fontsOk) return;
+  try { await Promise.all([`700 72px ${DISP}`, `700 46px ${DISP}`, `500 27px ${BODY}`, `600 22px ${BODY}`].map(f => document.fonts.load(f))); } catch(e){}
+  fontsOk = true;
+}
+
+// ── DOWNLOAD / SHARE ─────────────────────────────────────────────────
+function dlMeme() { const a = document.createElement('a'); a.download = 'genmeme-genlayer.png'; a.href = canvas.toDataURL('image/png'); a.click(); }
+async function cpMeme() {
+  try {
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    const b = document.getElementById('copy-btn'), o = b.innerHTML;
+    b.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg> Copied';
+    setTimeout(() => b.innerHTML = o, 2000);
+  } catch(e) { alert('Use Download instead — clipboard unavailable here.'); }
+}
+function tweetIt(e) {
+  e.preventDefault();
+  const t = encodeURIComponent('Made a GenLayer meme with Mochi.\n#GenLayer #GenMeme\ngenlayer.com');
+  window.open(`https://x.com/intent/tweet?text=${t}`, '_blank');
+}
+
+// ── UI BUILD ─────────────────────────────────────────────────────────
+function buildMochiGrid() {
+  const g = document.getElementById('mochi-grid'); g.innerHTML = '';
+  MOCHILIST.forEach((m, i) => {
+    const d = document.createElement('div');
+    d.className = 'mtile' + (i === selMochi ? ' sel' : ''); d.title = m.label;
+    const img = document.createElement('img'); img.src = thumb(m.src, 280); img.alt = m.label; img.loading = 'eager'; img.decoding = 'async';
+    d.appendChild(img);
+    d.addEventListener('click', () => { selMochi = i; document.querySelectorAll('.mtile').forEach((el, j) => el.classList.toggle('sel', j === i)); render(); });
+    g.appendChild(d);
+  });
+}
+function buildTmplGrid() {
+  const g = document.getElementById('tmpl-grid'); g.innerHTML = '';
+  TMPLS.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'ttile' + (t.id === selTmpl ? ' sel' : '');
+    d.innerHTML = `<div><div class="tt">${t.label}</div><div class="td">${t.desc}</div></div>`;
+    d.addEventListener('click', () => { selTmpl = t.id; document.querySelectorAll('.ttile').forEach(el => el.classList.remove('sel')); d.classList.add('sel'); render(); });
+    g.appendChild(d);
+  });
+}
+
+// PFP upload
+const pfpZone = document.getElementById('pfp-zone'), pfpFile = document.getElementById('pfp-file');
+pfpFile.addEventListener('change', e => { if (e.target.files[0]) loadPFP(e.target.files[0]); });
+pfpZone.addEventListener('dragover', e => { e.preventDefault(); pfpZone.classList.add('on'); });
+pfpZone.addEventListener('dragleave', () => pfpZone.classList.remove('on'));
+pfpZone.addEventListener('drop', e => { e.preventDefault(); pfpZone.classList.remove('on'); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) loadPFP(f); });
+function loadPFP(file) { const fr = new FileReader(); fr.onload = e => { const img = new Image(); img.onload = () => { pfpImg = img; showPFP(e.target.result); render(); }; img.src = e.target.result; }; fr.readAsDataURL(file); }
+function showPFP(src) { document.getElementById('pfp-ph').style.display = 'none'; const p = document.getElementById('pfp-prev'); p.style.display = 'flex'; document.getElementById('pfp-thumb').src = src; }
+function clearPFP(e) { e.stopPropagation(); pfpImg = null; pfpFile.value = ''; document.getElementById('pfp-ph').style.display = 'block'; document.getElementById('pfp-prev').style.display = 'none'; render(); }
+
+document.getElementById('custom-mochi-file').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  document.getElementById('custom-mochi-name').textContent = '✓ ' + f.name;
+  const fr = new FileReader(); fr.onload = ev => { const img = new Image(); img.onload = () => { mochiCache[selMochi] = img; render(); }; img.src = ev.target.result; }; fr.readAsDataURL(f);
+});
+
+// inputs (debounced)
+let dT; const db = () => { clearTimeout(dT); dT = setTimeout(render, 220); };
+document.getElementById('cap1').addEventListener('input', e => { cap1 = e.target.value; db(); });
+document.getElementById('cap2').addEventListener('input', e => { cap2 = e.target.value; db(); });
+document.getElementById('cap3').addEventListener('input', e => { cap3 = e.target.value; db(); });
+
+// ── PAGE MOTION ──────────────────────────────────────────────────────
+// nav scroll state
+const nav = document.getElementById('nav');
+const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 24);
+window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+// hero line reveal
+requestAnimationFrame(() => setTimeout(() => document.querySelector('.hero').classList.add('ready'), 80));
+
+// marquee build
+(function buildMarquee() {
+  const items = ['WAGMI', 'TRUSTLESS ADJUDICATION', '#GENLAYER', 'MOCHI', 'GM SER', 'OPTIMISTIC DEMOCRACY', 'INTELLIGENT CONTRACTS', 'STONKS UP'];
+  const track = document.getElementById('mq');
+  const seq = [...items, ...items]; // duplicate for seamless loop
+  seq.forEach(t => { const s = document.createElement('span'); s.innerHTML = `${t}<span class="dot"></span>`; track.appendChild(s); });
+})();
+
+// reveal on scroll
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+}
+// fail-safe: ensure everything visible
+setTimeout(() => document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in')), 1600);
+
+// count-up stats
+function countUp(el) {
+  const target = +el.dataset.count; const dur = 900; const t0 = performance.now();
+  (function step(t) {
+    const p = Math.min((t - t0) / dur, 1); const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target); if (p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+if ('IntersectionObserver' in window) {
+  const co = new IntersectionObserver((entries) => {
+    entries.forEach(en => { if (en.isIntersecting) { countUp(en.target); co.unobserve(en.target); } });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('.num[data-count]').forEach(el => co.observe(el));
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+buildMochiGrid();
+buildTmplGrid();
+setTimeout(render, 360);
+MOCHILIST.forEach((m, i) => setTimeout(() => ldImg(m.src).then(img => { if (img) mochiCache[i] = img; if (i === selMochi) render(); }), i * 160));
+</script>
+</body>
+</html>
