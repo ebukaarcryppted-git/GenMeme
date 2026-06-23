@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <style>
     :root {
       --bg: #07191E;
@@ -291,7 +292,7 @@
         <span class="ln"><span>GenLayer Memes</span></span>
         <span class="ln"><span>With Mochi</span></span>
       </h1>
-      <p class="lead">Upload your PFP, choose your favorite pose of Mochi — GenLayer's official mascot — and ship a shareable Web3 meme in seconds.</p>
+      <p class="lead">Upload your photo, pick a Mochi — GenLayer's official mascot — and our engine swaps your face with Mochi's in one shot.</p>
       <div class="hero-cta">
         <a href="#generator" class="btn btn-p">Start Generating
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -301,7 +302,7 @@
         </a>
       </div>
       <div class="hero-stats">
-        <div class="st"><div class="num" data-count="4">0</div><div class="cap">Templates</div></div>
+        <div class="st"><div class="num">Auto</div><div class="cap">Face Swap</div></div>
         <div class="st"><div class="num" data-count="9">0</div><div class="cap">Mochi Poses</div></div>
         <div class="st"><div class="num">Free</div><div class="cap">Forever</div></div>
       </div>
@@ -330,7 +331,7 @@
     <div class="sec-head reveal">
       <div>
         <div class="kicker"><span class="sq"></span>Generator</div>
-        <h2 style="font-size:clamp(28px,3.6vw,44px);text-transform:uppercase;margin-top:14px;">Build Your Meme</h2>
+        <h2 style="font-size:clamp(28px,3.6vw,44px);text-transform:uppercase;margin-top:14px;">Swap Your Face</h2>
       </div>
       <div class="sec-num">01 / 03</div>
     </div>
@@ -342,19 +343,19 @@
         <div class="step reveal">
           <div class="step-top">
             <div class="step-no">1</div>
-            <div><div class="step-title">Upload Your PFP</div><div class="step-sub">PNG · JPG · GIF · WEBP</div></div>
+            <div><div class="step-title">Upload Your Photo</div><div class="step-sub">A clear front-facing photo works best</div></div>
           </div>
           <div class="step-body">
             <div id="pfp-zone" class="drop" onclick="document.getElementById('pfp-file').click()">
               <input type="file" id="pfp-file" accept="image/*" style="display:none" />
               <div id="pfp-ph">
                 <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#02F5A1" stroke-width="1.6"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-                <div class="t1">Drop your PFP here</div>
+                <div class="t1">Drop your photo here</div>
                 <div class="t2">or click to browse</div>
               </div>
               <div id="pfp-prev" style="display:none;flex-direction:column;align-items:center;gap:12px;">
-                <img id="pfp-thumb" alt="PFP preview" style="width:92px;height:92px;object-fit:cover;border:1px solid var(--green);" />
-                <div style="font-family:var(--disp);font-size:13px;font-weight:600;">PFP Loaded</div>
+                <img id="pfp-thumb" alt="Photo preview" style="width:92px;height:92px;object-fit:cover;border:1px solid var(--green);" />
+                <div id="pfp-status" style="font-family:var(--disp);font-size:13px;font-weight:600;">Photo Loaded</div>
                 <button class="ghost-btn" onclick="clearPFP(event)">Change</button>
               </div>
             </div>
@@ -365,7 +366,7 @@
         <div class="step reveal">
           <div class="step-top">
             <div class="step-no">2</div>
-            <div><div class="step-title">Choose Mochi Pose</div><div class="step-sub">Official mascot collection</div></div>
+            <div><div class="step-title">Choose Mochi Pose</div><div class="step-sub">Face-swap happens automatically</div></div>
           </div>
           <div class="step-body">
             <div id="mochi-grid" class="mgrid"></div>
@@ -377,41 +378,19 @@
             <div id="custom-mochi-name" style="font-size:12px;color:var(--w50);margin-top:8px;"></div>
           </div>
         </div>
-
-        <!-- STEP 3 -->
-        <div class="step reveal">
-          <div class="step-top">
-            <div class="step-no">3</div>
-            <div><div class="step-title">Pick Template</div><div class="step-sub">Choose your meme format</div></div>
-          </div>
-          <div class="step-body"><div id="tmpl-grid" class="tgrid"></div></div>
-        </div>
-
-        <!-- STEP 4 -->
-        <div class="step reveal">
-          <div class="step-top">
-            <div class="step-no">4</div>
-            <div><div class="step-title">Add Caption</div><div class="step-sub">Optional — make it yours</div></div>
-          </div>
-          <div class="step-body">
-            <div class="field"><label>Main Caption</label><input id="cap1" type="text" maxlength="60" placeholder="GM SER · WAGMI · OPTIMISTIC DEMOCRACY" /></div>
-            <div class="field"><label>Sub-caption</label><input id="cap2" type="text" maxlength="80" placeholder="when GenLayer reaches consensus…" /></div>
-            <div class="field"><label>Your Handle</label><input id="cap3" type="text" maxlength="30" placeholder="@yourhandle" /></div>
-          </div>
-        </div>
       </div>
 
       <!-- PREVIEW -->
       <div class="preview">
         <div class="pv-top">
           <span class="lbl">Live Preview</span>
-          <span class="st"><span class="dot"></span><span id="rstatus">READY</span></span>
+          <span class="st"><span class="dot"></span><span id="rstatus">AWAITING PHOTO</span></span>
         </div>
         <div class="pv-canvas"><canvas id="meme-canvas" width="1080" height="1080"></canvas></div>
         <div class="pv-actions">
           <button class="btn btn-p" onclick="dlMeme()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download · 1080×1080
+            Download Meme
           </button>
           <button class="btn btn-p" id="copy-btn" onclick="cpMeme()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -441,20 +420,20 @@
       <div class="pcol reveal">
         <div class="pn">/ 01</div>
         <svg class="pic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <h3>Upload Your PFP</h3>
-        <p>Drag &amp; drop or browse your profile picture. Any format, any size — it gets cropped clean.</p>
+        <h3>Upload Your Photo</h3>
+        <p>Drop in any photo of yourself. Our engine locates your face automatically — no cropping required.</p>
       </div>
       <div class="pcol reveal">
         <div class="pn">/ 02</div>
-        <svg class="pic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <h3>Compose Layout</h3>
-        <p>Pick from nine official Mochi poses and four meme templates. The preview rebuilds instantly as you go.</p>
+        <svg class="pic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 10v6M4.22 4.22l4.24 4.24m7.07 7.07l4.24 4.24M1 12h6m10 0h6M4.22 19.78l4.24-4.24m7.07-7.07l4.24-4.24"/></svg>
+        <h3>Pick a Mochi</h3>
+        <p>Choose from nine official Mochi poses. Mochi's head is auto-cropped and resized to fit your face.</p>
       </div>
       <div class="pcol reveal">
         <div class="pn">/ 03</div>
         <svg class="pic" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        <h3>Export &amp; Share</h3>
-        <p>Download a crisp 1080×1080 PNG and drop it on X, Discord or Telegram — wherever the community lives.</p>
+        <h3>Download &amp; Share</h3>
+        <p>Your photo, with Mochi's face automatically swapped in. Download the PNG and ship it everywhere.</p>
       </div>
     </div>
   </div>
@@ -533,9 +512,10 @@
 
 <script>
 // ── STATE ───────────────────────────────────────────────────────────
-const W = 1080, H = 1080;
-let pfpImg = null, selMochi = 0, selTmpl = 'side', fontsOk = false;
-let cap1 = '', cap2 = '', cap3 = '';
+let photoImg = null;
+let selMochi = 0;
+let modelReady = false;
+let detectedFace = null;
 
 const MB = 'https://raw.githubusercontent.com/genlayer-foundation/genlayer-mascot/main/assets/';
 const MOCHILIST = [
@@ -549,216 +529,259 @@ const MOCHILIST = [
   { label:'Cookie',      src: MB+'stickers/mochi-sticker-cookie.png' },
   { label:'Stonks Down', src: MB+'stickers/mochi-sticker-stonks-down.png' },
 ];
-const TMPLS = [
-  { id:'side', label:'Side by Side', desc:'You & Mochi, equals' },
-  { id:'cert', label:'Certified',    desc:'Certified believer' },
-  { id:'gm',   label:'GM Ser',       desc:'Morning crypto greeting' },
-  { id:'when', label:'When…',        desc:'Reaction meme' },
-];
 const mochiCache = {};
-// resized WebP thumbnails via image CDN — load instantly instead of the 4000×4000 originals
+const mochiHeadCache = {};
 const thumb = (url, w) => 'https://wsrv.nl/?url=' + encodeURIComponent(url) + '&w=' + w + '&output=webp&q=80';
 const GREEN = '#02F5A1', ONYX = '#07191E', WHITE = '#FFFFFF';
-const DISP = 'Space Grotesk', BODY = 'Inter';
+const DISP = 'Space Grotesk';
 
 const canvas = document.getElementById('meme-canvas');
 const ctx = canvas.getContext('2d');
 
-// ── HELPERS ──────────────────────────────────────────────────────────
+const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+
+// ── MODEL INIT ──────────────────────────────────────────────────────
+async function initFaceModel() {
+  let tries = 0;
+  while (typeof faceapi === 'undefined' && tries < 60) {
+    await new Promise(r => setTimeout(r, 100)); tries++;
+  }
+  if (typeof faceapi === 'undefined') { console.warn('face-api.js failed to load'); return; }
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    modelReady = true;
+    if (photoImg && !detectedFace) { compose(); }
+  } catch (e) { console.warn('Model load failed:', e); }
+}
+
+// ── IMAGE LOAD ───────────────────────────────────────────────────────
 function ldImg(src) {
   return new Promise(res => {
     const img = new Image(); img.crossOrigin = 'anonymous';
     img.onload = () => res(img); img.onerror = () => res(null); img.src = src;
   });
 }
-function contain(c, img, x, y, w, h) {
-  if (!img) return;
-  const s = Math.min(w/img.width, h/img.height);
-  const nw = img.width*s, nh = img.height*s;
-  c.drawImage(img, x+(w-nw)/2, y+(h-nh)/2, nw, nh);
+
+// ── FACE DETECTION (user photo) ──────────────────────────────────────
+async function detectFace(img) {
+  if (!modelReady || typeof faceapi === 'undefined') return null;
+  try {
+    const det = await faceapi.detectSingleFace(
+      img,
+      new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.3 })
+    );
+    if (!det) return null;
+    return { x: det.box.x, y: det.box.y, w: det.box.width, h: det.box.height };
+  } catch (e) { console.warn('Face detect failed:', e); return null; }
 }
-function clipCircle(c, img, cx, cy, r) {
-  c.save(); c.beginPath(); c.arc(cx, cy, r, 0, Math.PI*2); c.closePath(); c.clip();
-  if (img) {
-    const s = Math.max(r*2/img.width, r*2/img.height);
-    const nw = img.width*s, nh = img.height*s;
-    c.drawImage(img, cx-nw/2, cy-nh/2, nw, nh);
-  } else {
-    c.fillStyle = 'rgba(2,245,161,0.06)'; c.fillRect(cx-r, cy-r, r*2, r*2);
-    c.font = `700 ${r*.38}px ${DISP}`; c.fillStyle = 'rgba(2,245,161,0.55)';
-    c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('PFP', cx, cy);
+
+// ── MOCHI HEAD DETECTION (cluster-aware alpha bbox) ──────────────────
+function detectMochiHead(img, key) {
+  if (mochiHeadCache[key]) return mochiHeadCache[key];
+  const target = 320;
+  const s = target / Math.max(img.width, img.height);
+  const w = Math.max(1, Math.round(img.width * s));
+  const h = Math.max(1, Math.round(img.height * s));
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const cx = c.getContext('2d');
+  cx.drawImage(img, 0, 0, w, h);
+  let d;
+  try { d = cx.getImageData(0, 0, w, h).data; } catch(e) { return null; }
+
+  // column histogram of opaque pixels → detect vertical clusters
+  // (handles character-sheet PNGs with multiple Mochis side by side)
+  const cols = new Uint16Array(w);
+  let maxCnt = 0;
+  for (let x = 0; x < w; x++) {
+    let cnt = 0;
+    for (let y = 0; y < h; y++) if (d[(y * w + x) * 4 + 3] > 80) cnt++;
+    cols[x] = cnt;
+    if (cnt > maxCnt) maxCnt = cnt;
   }
-  c.restore();
-}
-function wrapText(c, text, x, y, maxW, lh) {
-  const words = text.split(' '); let line = ''; const lines = [];
-  for (const w of words) {
-    const t = line ? line+' '+w : w;
-    if (c.measureText(t).width > maxW && line) { lines.push(line); line = w; }
-    else line = t;
-  }
-  if (line) lines.push(line);
-  lines.forEach((l, i) => c.fillText(l, x, y + i*lh));
-  return lines.length;
-}
-function drawBg() {
-  ctx.fillStyle = ONYX; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle = 'rgba(255,255,255,0.025)'; ctx.lineWidth = 1;
-  for (let i=0;i<=W;i+=72){ ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,H);ctx.stroke(); }
-  for (let i=0;i<=H;i+=72){ ctx.beginPath();ctx.moveTo(0,i);ctx.lineTo(W,i);ctx.stroke(); }
-  // outer frame
-  ctx.strokeStyle = 'rgba(2,245,161,0.22)'; ctx.lineWidth = 2;
-  ctx.strokeRect(20,20,W-40,H-40);
-}
-function corner(x, y, dx, dy) {
-  const s = 26; ctx.strokeStyle = GREEN; ctx.lineWidth = 4;
-  ctx.beginPath(); ctx.moveTo(x, y+dy*s); ctx.lineTo(x, y); ctx.lineTo(x+dx*s, y); ctx.stroke();
-}
-function drawWM() {
-  ctx.save();
-  ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
-  ctx.font = `700 22px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText('GENMEME', W-44, H-44);
-  ctx.restore();
-}
+  if (maxCnt === 0) return null;
+  const colThresh = Math.max(2, maxCnt * 0.05);
 
-// ── TEMPLATES (flat, no glow/shadow) ─────────────────────────────────
-function tSide() {
-  drawBg();
-  const mochi = mochiCache[selMochi];
-  const hasBar = cap1 || cap2;
-  const cH = hasBar ? H-180 : H-44;
-  const half = W/2;
-  ctx.strokeStyle = 'rgba(2,245,161,0.28)'; ctx.lineWidth = 2; ctx.setLineDash([10,8]);
-  ctx.beginPath(); ctx.moveTo(half, 60); ctx.lineTo(half, cH-30); ctx.stroke(); ctx.setLineDash([]);
-
-  const pfpCX = half/2, pfpCY = cH/2, pfpR = Math.min(half/2-72, cH/2-72);
-  clipCircle(ctx, pfpImg, pfpCX, pfpCY, pfpR);
-  ctx.strokeStyle = GREEN; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR,0,Math.PI*2); ctx.stroke();
-  if (cap3) { ctx.font = `600 22px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle=WHITE; ctx.fillText(cap3, pfpCX, pfpCY+pfpR+20); }
-
-  contain(ctx, mochi, half+34, 60, half-86, cH-120);
-
-  if (hasBar) {
-    ctx.strokeStyle = 'rgba(2,245,161,0.28)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(40, cH); ctx.lineTo(W-40, cH); ctx.stroke();
-    const mid = cH + (H-cH)/2; ctx.textAlign='center'; ctx.textBaseline='middle';
-    if (cap1 && cap2) {
-      ctx.font = `700 46px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText(cap1.toUpperCase(), W/2, mid-26);
-      ctx.font = `500 27px ${BODY}`; ctx.fillStyle = WHITE; ctx.fillText(cap2, W/2, mid+28);
-    } else if (cap1) {
-      ctx.font = `700 54px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText(cap1.toUpperCase(), W/2, mid);
-    } else {
-      ctx.font = `500 32px ${BODY}`; ctx.fillStyle = WHITE; ctx.fillText(cap2, W/2, mid);
+  // build clusters (runs of cols above threshold)
+  const clusters = [];
+  let inRun = false, rs = 0;
+  for (let x = 0; x < w; x++) {
+    if (cols[x] > colThresh && !inRun) { inRun = true; rs = x; }
+    else if (cols[x] <= colThresh && inRun) {
+      inRun = false;
+      if (x - rs >= w * 0.04) clusters.push({ xs: rs, xe: x - 1 });
     }
   }
-  corner(20,20,1,1); corner(W-20,20,-1,1); corner(20,H-20,1,-1); corner(W-20,H-20,-1,-1);
-  drawWM();
-}
+  if (inRun && w - rs >= w * 0.04) clusters.push({ xs: rs, xe: w - 1 });
+  if (clusters.length === 0) return null;
 
-function tCert() {
-  drawBg();
-  const mochi = mochiCache[selMochi];
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  ctx.font = `700 92px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText('CERTIFIED', W/2, 70);
-  ctx.font = `500 34px ${BODY}`; ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  ctx.fillText(cap1 || 'GenLayer Believer', W/2, 178);
-
-  const pfpCX = W/2-92, pfpCY = H/2+34, pfpR = 198;
-  ctx.strokeStyle = 'rgba(2,245,161,0.22)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR+18,0,Math.PI*2); ctx.stroke();
-  clipCircle(ctx, pfpImg, pfpCX, pfpCY, pfpR);
-  ctx.strokeStyle = GREEN; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR,0,Math.PI*2); ctx.stroke();
-  // check badge (flat)
-  const bx = pfpCX+pfpR*.72, by = pfpCY+pfpR*.72, br = 60;
-  ctx.fillStyle = GREEN; ctx.beginPath(); ctx.arc(bx,by,br,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle = ONYX; ctx.lineWidth = 8; ctx.lineCap='round'; ctx.lineJoin='round';
-  ctx.beginPath(); ctx.moveTo(bx-25,by); ctx.lineTo(bx-8,by+18); ctx.lineTo(bx+25,by-18); ctx.stroke(); ctx.lineCap='butt';
-  if (cap3) { ctx.font = `600 23px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fillText(cap3, pfpCX, pfpCY+pfpR+22); }
-  contain(ctx, mochi, pfpCX+pfpR+14, pfpCY-210, 320, 420);
-  if (cap2) { ctx.font = `500 27px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.fillText(cap2, W/2, H-44); }
-  corner(20,20,1,1); corner(W-20,20,-1,1); corner(20,H-20,1,-1); corner(W-20,H-20,-1,-1);
-  drawWM();
-}
-
-function tGM() {
-  drawBg();
-  const mochi = mochiCache[selMochi];
-  ctx.textAlign='left'; ctx.textBaseline='top';
-  ctx.font = `700 132px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText('GM', 72, 76);
-  ctx.font = `700 80px ${DISP}`; ctx.fillStyle = WHITE; ctx.fillText('SER', 72, 214);
-  ctx.fillStyle = GREEN; ctx.fillRect(72, 330, 120, 8);
-  if (cap1) { ctx.font = `500 33px ${BODY}`; ctx.fillStyle = 'rgba(255,255,255,0.72)'; wrapText(ctx, cap1, 72, 360, 480, 46); }
-  contain(ctx, mochi, W/2+30, 110, W/2-70, 660);
-
-  const pfpR = 86, pfpCX = pfpR+72, pfpCY = H-pfpR-86;
-  clipCircle(ctx, pfpImg, pfpCX, pfpCY, pfpR);
-  ctx.strokeStyle = GREEN; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR,0,Math.PI*2); ctx.stroke();
-  if (cap3) { ctx.font = `600 23px ${BODY}`; ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillStyle=WHITE; ctx.fillText(cap3, pfpCX+pfpR+16, pfpCY); }
-  if (cap2) { ctx.font = `500 27px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillStyle='rgba(255,255,255,0.6)'; ctx.fillText(cap2, W/2, H-44); }
-  corner(20,20,1,1); corner(W-20,20,-1,1); corner(20,H-20,1,-1); corner(W-20,H-20,-1,-1);
-  drawWM();
-}
-
-function tWhen() {
-  drawBg();
-  const mochi = mochiCache[selMochi];
-  const topH = 168;
-  ctx.strokeStyle = 'rgba(2,245,161,0.28)'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(40, topH); ctx.lineTo(W-40, topH); ctx.stroke();
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  const txt = 'WHEN ' + (cap1 ? cap1.toUpperCase() : '[ ADD CAPTION ]');
-  let fs = 48; ctx.font = `700 ${fs}px ${DISP}`;
-  while (ctx.measureText(txt).width > W-110 && fs > 24) { fs -= 2; ctx.font = `700 ${fs}px ${DISP}`; }
-  ctx.fillStyle = WHITE; ctx.fillText(txt, W/2, topH/2+10);
-
-  const botH = cap2 ? 128 : 60;
-  contain(ctx, mochi, 80, topH+24, W-160, H-topH-botH-44);
-
-  const pfpR = 66, pfpCX = W-pfpR-56, pfpCY = H-pfpR-56;
-  clipCircle(ctx, pfpImg, pfpCX, pfpCY, pfpR);
-  ctx.strokeStyle = GREEN; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(pfpCX,pfpCY,pfpR,0,Math.PI*2); ctx.stroke();
-  if (cap3) { ctx.font = `500 18px ${BODY}`; ctx.textAlign='right'; ctx.textBaseline='bottom'; ctx.fillStyle='rgba(255,255,255,0.65)'; ctx.fillText(cap3, pfpCX-pfpR-12, pfpCY+6); }
-  if (cap2) {
-    const by = H-botH;
-    ctx.strokeStyle = 'rgba(2,245,161,0.28)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(40, by); ctx.lineTo(W-40, by); ctx.stroke();
-    ctx.font = `500 29px ${BODY}`; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillStyle = WHITE; ctx.fillText(cap2, W/2-56, by+botH/2);
+  // pick the cluster closest to image horizontal center
+  const midW = w / 2;
+  let chosen = clusters[0]; let best = Infinity;
+  for (const cl of clusters) {
+    const ccx = (cl.xs + cl.xe) / 2;
+    const dist = Math.abs(ccx - midW);
+    if (dist < best) { best = dist; chosen = cl; }
   }
-  corner(20,20,1,1); corner(W-20,20,-1,1); corner(20,H-20,1,-1); corner(W-20,H-20,-1,-1);
-  drawWM();
+
+  // vertical bbox within the chosen cluster
+  let minY = h, maxY = -1;
+  for (let y = 0; y < h; y++) {
+    let hit = false;
+    for (let x = chosen.xs; x <= chosen.xe; x++) {
+      if (d[(y * w + x) * 4 + 3] > 80) { hit = true; break; }
+    }
+    if (hit) { if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  }
+  if (maxY < 0) return null;
+
+  const bw = chosen.xe - chosen.xs + 1;
+  const bh = maxY - minY + 1;
+  const aspect = bh / bw;
+
+  // head fraction by character aspect ratio
+  let frac;
+  if (aspect > 1.55) frac = 0.45;
+  else if (aspect > 1.20) frac = 0.55;
+  else if (aspect > 0.90) frac = 0.72;
+  else frac = 1.0;
+  const headBottom = minY + Math.round(bh * frac);
+
+  // tighten horizontally within the head band (in chosen cluster only)
+  let hMinX = chosen.xe + 1, hMaxX = chosen.xs - 1;
+  for (let y = minY; y <= headBottom; y++) {
+    for (let x = chosen.xs; x <= chosen.xe; x++) {
+      if (d[(y * w + x) * 4 + 3] > 80) {
+        if (x < hMinX) hMinX = x;
+        if (x > hMaxX) hMaxX = x;
+      }
+    }
+  }
+  if (hMaxX < hMinX) { hMinX = chosen.xs; hMaxX = chosen.xe; }
+
+  const inv = 1 / s;
+  const r = {
+    x: hMinX * inv,
+    y: minY * inv,
+    w: (hMaxX - hMinX + 1) * inv,
+    h: (headBottom - minY + 1) * inv,
+  };
+  mochiHeadCache[key] = r;
+  return r;
 }
 
-// ── RENDER ───────────────────────────────────────────────────────────
-let rendering = false;
-async function render() {
-  if (rendering) return; rendering = true;
-  const stEl = document.getElementById('rstatus'); stEl.textContent = 'RENDERING';
-  await ensureFonts();
-  if (!mochiCache[selMochi]) mochiCache[selMochi] = await ldImg(MOCHILIST[selMochi].src);
-  ({ side:tSide, cert:tCert, gm:tGM, when:tWhen }[selTmpl] || tSide)();
-  stEl.textContent = 'READY'; rendering = false;
-}
-async function ensureFonts() {
-  if (fontsOk) return;
-  try { await Promise.all([`700 72px ${DISP}`, `700 46px ${DISP}`, `500 27px ${BODY}`, `600 22px ${BODY}`].map(f => document.fonts.load(f))); } catch(e){}
-  fontsOk = true;
+// ── PLACEHOLDER (empty canvas) ───────────────────────────────────────
+function drawPlaceholder(msg) {
+  canvas.width = 1080; canvas.height = 1080;
+  ctx.fillStyle = ONYX; ctx.fillRect(0, 0, 1080, 1080);
+  // hairline grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 1080; i += 72) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1080); ctx.stroke(); }
+  for (let i = 0; i <= 1080; i += 72) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1080, i); ctx.stroke(); }
+  // green corners
+  ctx.strokeStyle = GREEN; ctx.lineWidth = 5;
+  const cs = 36;
+  [[40, 40, 1, 1], [1040, 40, -1, 1], [40, 1040, 1, -1], [1040, 1040, -1, -1]].forEach(([x, y, dx, dy]) => {
+    ctx.beginPath(); ctx.moveTo(x, y + dy * cs); ctx.lineTo(x, y); ctx.lineTo(x + dx * cs, y); ctx.stroke();
+  });
+  // center hint
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = `700 56px ${DISP}`;
+  ctx.fillText('UPLOAD A PHOTO', 540, 510);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = `500 22px Inter`;
+  ctx.fillText(msg || 'Mochi face-swap happens automatically', 540, 568);
 }
 
-// ── DOWNLOAD / SHARE ─────────────────────────────────────────────────
-function dlMeme() { const a = document.createElement('a'); a.download = 'genmeme-genlayer.png'; a.href = canvas.toDataURL('image/png'); a.click(); }
+// ── COMPOSE (the face swap) ──────────────────────────────────────────
+let composing = false;
+async function compose() {
+  if (composing) return; composing = true;
+  const stEl = document.getElementById('rstatus');
+
+  if (!photoImg) {
+    drawPlaceholder();
+    stEl.textContent = 'AWAITING PHOTO';
+    composing = false;
+    return;
+  }
+
+  stEl.textContent = 'DETECTING';
+
+  // canvas dims = photo dims, capped
+  const maxDim = 1920;
+  let cw = photoImg.naturalWidth, ch = photoImg.naturalHeight;
+  if (Math.max(cw, ch) > maxDim) {
+    const sc = maxDim / Math.max(cw, ch);
+    cw = Math.round(cw * sc); ch = Math.round(ch * sc);
+  }
+  canvas.width = cw; canvas.height = ch;
+  ctx.drawImage(photoImg, 0, 0, cw, ch);
+
+  // detect user face (cached on photo change)
+  if (!detectedFace) detectedFace = await detectFace(photoImg);
+  let face = detectedFace;
+
+  // scale face coords from natural to canvas dims
+  let scaledFace, pad;
+  if (face) {
+    const sx = cw / photoImg.naturalWidth;
+    const sy = ch / photoImg.naturalHeight;
+    scaledFace = { x: face.x * sx, y: face.y * sy, w: face.w * sx, h: face.h * sy };
+    pad = 1.45; // face-api bbox is tight on eyes/nose/mouth — pad up to cover full head
+    const pst = document.getElementById('pfp-status');
+    if (pst) pst.textContent = 'Face Detected';
+  } else {
+    // fallback: upper-center, smaller area
+    scaledFace = { x: cw * 0.35, y: ch * 0.18, w: cw * 0.30, h: ch * 0.34 };
+    pad = 1.05; // fallback area already approximates the head — minimal extra pad
+    const pst = document.getElementById('pfp-status');
+    if (pst) pst.textContent = modelReady ? 'No Face Found · Using Center' : 'Loading Detector…';
+  }
+
+  // overlay Mochi head
+  stEl.textContent = 'COMPOSING';
+  const mochi = mochiCache[selMochi];
+  if (mochi) {
+    const head = detectMochiHead(mochi, selMochi);
+    if (head) {
+      const scale = Math.max(scaledFace.w * pad / head.w, scaledFace.h * pad / head.h);
+      const dw = head.w * scale;
+      const dh = head.h * scale;
+      const faceCX = scaledFace.x + scaledFace.w / 2;
+      const faceCY = scaledFace.y + scaledFace.h / 2;
+      const dx = faceCX - dw / 2;
+      const dy = faceCY - dh / 2 - scaledFace.h * 0.04;
+      ctx.drawImage(mochi, head.x, head.y, head.w, head.h, dx, dy, dw, dh);
+    }
+  }
+
+  stEl.textContent = 'READY';
+  composing = false;
+}
+
+// ── DOWNLOAD / COPY / SHARE ──────────────────────────────────────────
+function dlMeme() {
+  if (!photoImg) { alert('Upload a photo first.'); return; }
+  const a = document.createElement('a');
+  a.download = 'genmeme-mochi.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
 async function cpMeme() {
+  if (!photoImg) { alert('Upload a photo first.'); return; }
   try {
     const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
     const b = document.getElementById('copy-btn'), o = b.innerHTML;
     b.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg> Copied';
     setTimeout(() => b.innerHTML = o, 2000);
-  } catch(e) { alert('Use Download instead — clipboard unavailable here.'); }
+  } catch (e) { alert('Use Download instead — clipboard unavailable here.'); }
 }
 function tweetIt(e) {
   e.preventDefault();
-  const t = encodeURIComponent('Made a GenLayer meme with Mochi.\n#GenLayer #GenMeme\ngenlayer.com');
+  const t = encodeURIComponent('Just turned my face into Mochi with @GenLayer 🍡\n#GenLayer #GenMeme\ngenlayer.com');
   window.open(`https://x.com/intent/tweet?text=${t}`, '_blank');
 }
 
@@ -768,63 +791,87 @@ function buildMochiGrid() {
   MOCHILIST.forEach((m, i) => {
     const d = document.createElement('div');
     d.className = 'mtile' + (i === selMochi ? ' sel' : ''); d.title = m.label;
-    const img = document.createElement('img'); img.src = thumb(m.src, 280); img.alt = m.label; img.loading = 'eager'; img.decoding = 'async';
+    const img = document.createElement('img');
+    img.src = thumb(m.src, 280);
+    img.alt = m.label; img.loading = 'eager'; img.decoding = 'async';
     d.appendChild(img);
-    d.addEventListener('click', () => { selMochi = i; document.querySelectorAll('.mtile').forEach((el, j) => el.classList.toggle('sel', j === i)); render(); });
-    g.appendChild(d);
-  });
-}
-function buildTmplGrid() {
-  const g = document.getElementById('tmpl-grid'); g.innerHTML = '';
-  TMPLS.forEach(t => {
-    const d = document.createElement('div');
-    d.className = 'ttile' + (t.id === selTmpl ? ' sel' : '');
-    d.innerHTML = `<div><div class="tt">${t.label}</div><div class="td">${t.desc}</div></div>`;
-    d.addEventListener('click', () => { selTmpl = t.id; document.querySelectorAll('.ttile').forEach(el => el.classList.remove('sel')); d.classList.add('sel'); render(); });
+    d.addEventListener('click', () => {
+      selMochi = i;
+      document.querySelectorAll('.mtile').forEach((el, j) => el.classList.toggle('sel', j === i));
+      compose();
+    });
     g.appendChild(d);
   });
 }
 
-// PFP upload
+// ── PHOTO UPLOAD ─────────────────────────────────────────────────────
 const pfpZone = document.getElementById('pfp-zone'), pfpFile = document.getElementById('pfp-file');
-pfpFile.addEventListener('change', e => { if (e.target.files[0]) loadPFP(e.target.files[0]); });
+pfpFile.addEventListener('change', e => { if (e.target.files[0]) loadPhoto(e.target.files[0]); });
 pfpZone.addEventListener('dragover', e => { e.preventDefault(); pfpZone.classList.add('on'); });
 pfpZone.addEventListener('dragleave', () => pfpZone.classList.remove('on'));
-pfpZone.addEventListener('drop', e => { e.preventDefault(); pfpZone.classList.remove('on'); const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) loadPFP(f); });
-function loadPFP(file) { const fr = new FileReader(); fr.onload = e => { const img = new Image(); img.onload = () => { pfpImg = img; showPFP(e.target.result); render(); }; img.src = e.target.result; }; fr.readAsDataURL(file); }
-function showPFP(src) { document.getElementById('pfp-ph').style.display = 'none'; const p = document.getElementById('pfp-prev'); p.style.display = 'flex'; document.getElementById('pfp-thumb').src = src; }
-function clearPFP(e) { e.stopPropagation(); pfpImg = null; pfpFile.value = ''; document.getElementById('pfp-ph').style.display = 'block'; document.getElementById('pfp-prev').style.display = 'none'; render(); }
+pfpZone.addEventListener('drop', e => {
+  e.preventDefault(); pfpZone.classList.remove('on');
+  const f = e.dataTransfer.files[0]; if (f && f.type.startsWith('image/')) loadPhoto(f);
+});
+function loadPhoto(file) {
+  const fr = new FileReader();
+  fr.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      photoImg = img;
+      detectedFace = null;
+      showPhoto(e.target.result);
+      compose();
+    };
+    img.src = e.target.result;
+  };
+  fr.readAsDataURL(file);
+}
+function showPhoto(src) {
+  document.getElementById('pfp-ph').style.display = 'none';
+  const p = document.getElementById('pfp-prev'); p.style.display = 'flex';
+  document.getElementById('pfp-thumb').src = src;
+  document.getElementById('pfp-status').textContent = 'Photo Loaded';
+}
+function clearPFP(e) {
+  e.stopPropagation();
+  photoImg = null; detectedFace = null; pfpFile.value = '';
+  document.getElementById('pfp-ph').style.display = 'block';
+  document.getElementById('pfp-prev').style.display = 'none';
+  compose();
+}
 
+// ── CUSTOM MOCHI UPLOAD ──────────────────────────────────────────────
 document.getElementById('custom-mochi-file').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   document.getElementById('custom-mochi-name').textContent = '✓ ' + f.name;
-  const fr = new FileReader(); fr.onload = ev => { const img = new Image(); img.onload = () => { mochiCache[selMochi] = img; render(); }; img.src = ev.target.result; }; fr.readAsDataURL(f);
+  const fr = new FileReader();
+  fr.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      mochiCache[selMochi] = img;
+      delete mochiHeadCache[selMochi];
+      compose();
+    };
+    img.src = ev.target.result;
+  };
+  fr.readAsDataURL(f);
 });
 
-// inputs (debounced)
-let dT; const db = () => { clearTimeout(dT); dT = setTimeout(render, 220); };
-document.getElementById('cap1').addEventListener('input', e => { cap1 = e.target.value; db(); });
-document.getElementById('cap2').addEventListener('input', e => { cap2 = e.target.value; db(); });
-document.getElementById('cap3').addEventListener('input', e => { cap3 = e.target.value; db(); });
-
 // ── PAGE MOTION ──────────────────────────────────────────────────────
-// nav scroll state
 const nav = document.getElementById('nav');
 const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 24);
 window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
-// hero line reveal
 requestAnimationFrame(() => setTimeout(() => document.querySelector('.hero').classList.add('ready'), 80));
 
-// marquee build
 (function buildMarquee() {
-  const items = ['WAGMI', 'TRUSTLESS ADJUDICATION', '#GENLAYER', 'MOCHI', 'GM SER', 'OPTIMISTIC DEMOCRACY', 'INTELLIGENT CONTRACTS', 'STONKS UP'];
+  const items = ['WAGMI', 'TRUSTLESS ADJUDICATION', '#GENLAYER', 'MOCHI', 'GM SER', 'OPTIMISTIC DEMOCRACY', 'INTELLIGENT CONTRACTS', 'FACE SWAP'];
   const track = document.getElementById('mq');
-  const seq = [...items, ...items]; // duplicate for seamless loop
+  const seq = [...items, ...items];
   seq.forEach(t => { const s = document.createElement('span'); s.innerHTML = `${t}<span class="dot"></span>`; track.appendChild(s); });
 })();
 
-// reveal on scroll
 if ('IntersectionObserver' in window) {
   const io = new IntersectionObserver((entries) => {
     entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
@@ -833,10 +880,8 @@ if ('IntersectionObserver' in window) {
 } else {
   document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
 }
-// fail-safe: ensure everything visible
 setTimeout(() => document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in')), 1600);
 
-// count-up stats
 function countUp(el) {
   const target = +el.dataset.count; const dur = 900; const t0 = performance.now();
   (function step(t) {
@@ -853,9 +898,11 @@ if ('IntersectionObserver' in window) {
 
 // ── INIT ─────────────────────────────────────────────────────────────
 buildMochiGrid();
-buildTmplGrid();
-setTimeout(render, 360);
-MOCHILIST.forEach((m, i) => setTimeout(() => ldImg(m.src).then(img => { if (img) mochiCache[i] = img; if (i === selMochi) render(); }), i * 160));
+drawPlaceholder();
+initFaceModel();
+MOCHILIST.forEach((m, i) => setTimeout(() => ldImg(m.src).then(img => {
+  if (img) { mochiCache[i] = img; if (i === selMochi && photoImg) compose(); }
+}), i * 140));
 </script>
 </body>
 </html>
