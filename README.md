@@ -8,7 +8,7 @@
 
 ## What It Does
 
-GenMeme is a browser-based meme generator built for [GenLayer](https://www.genlayer.com/) — the Intelligent Blockchain platform. Upload your profile picture, pick a Mochi pose, and generate a crisp **1080×1080 meme** you can download, copy to clipboard, or share directly to X (Twitter).
+GenMeme is a browser-based meme generator built for [GenLayer](https://www.genlayer.com/) — the Intelligent Blockchain platform. Upload any photo, pick a Mochi pose, then **drag and zoom** Mochi anywhere on your image to compose the perfect meme. Download the result as a PNG, copy it to your clipboard, or share it straight to X.
 
 No backend. No uploads. Everything runs in your browser.
 
@@ -16,15 +16,13 @@ No backend. No uploads. Everything runs in your browser.
 
 ## Features
 
-- **PFP Upload** — drag-and-drop or click to upload your profile picture
-- **9 Mochi Poses** — choose from GenLayer's official mascot artwork (renders, concept art, stickers)
-- **4 Meme Templates**
-  - `Side by Side` — you and Mochi, side by side
-  - `Certified` — certified stamp layout
-  - `GM Ser` — good morning Web3 energy
-  - `When…` — classic reaction format
-- **Custom Captions** — add your own text to each template
-- **1080×1080 Export** — full-resolution PNG download
+- **Photo Upload** — drag-and-drop or click to load any image into the live preview
+- **11 Mochi Poses** — bundled transparent PNGs of GenLayer's official mascot
+- **Drag To Position** — click and drag Mochi anywhere on the canvas
+- **Zoom On Cursor** — mouse wheel zoom anchored on the pointer, plus `+`, `−`, and `Reset` buttons
+- **Per-Pose State** — each Mochi remembers its own position and zoom when you switch
+- **Custom Mochi** — upload your own PNG to use as the overlay
+- **PNG Export** — download at full photo resolution (capped at 1920px)
 - **Copy to Clipboard** — instant paste anywhere
 - **Share on X** — one-click tweet with pre-filled hashtags
 
@@ -35,10 +33,11 @@ No backend. No uploads. Everything runs in your browser.
 | Layer | Choice |
 |---|---|
 | Runtime | Vanilla HTML5 + CSS + JS — zero dependencies |
-| Canvas | HTML5 Canvas API (meme composition + export) |
+| Canvas | HTML5 Canvas API (drag, zoom, composition, PNG export) |
+| Input | Pointer Events API (mouse + touch + pen, all unified) |
 | Fonts | Space Grotesk (display) + Inter (body) via Google Fonts |
-| Image CDN | [wsrv.nl](https://wsrv.nl/) — resizes 4000×4000 Mochi PNGs to WebP for instant display |
-| Mascot Assets | [genlayer-foundation/genlayer-mascot](https://github.com/genlayer-foundation/genlayer-mascot) |
+| Assets | 11 transparent Mochi PNGs bundled locally in `assets/mochi/` |
+| Preprocessing | `scripts/clean_mochi.py` — flood-fill alpha stripper for new poses |
 
 ---
 
@@ -65,7 +64,20 @@ python -m http.server 3333
 # then open http://localhost:3333
 ```
 
-No build step. No `npm install`. Open `index.html` in a browser and it works.
+No build step. No `npm install`. Open `index.html` through any static server.
+
+---
+
+## Adding More Mochi Poses
+
+Drop a new PNG into `assets/mochi/`, named `12.png`, `13.png`, etc. Then:
+
+```bash
+# Strip white backgrounds and tight-crop in place
+python scripts/clean_mochi.py
+```
+
+Finally bump the `length: 11` in the `MOCHILIST` array inside `index.html` to match the new count.
 
 ---
 
@@ -73,7 +85,11 @@ No build step. No `npm install`. Open `index.html` in a browser and it works.
 
 ```
 GenMeme/
-└── index.html      # entire app — HTML, CSS, and JS in one file
+├── index.html              # entire app — HTML, CSS, and JS in one file
+├── assets/
+│   └── mochi/              # 11 transparent Mochi pose PNGs
+└── scripts/
+    └── clean_mochi.py      # strip white bg + tight-crop helper
 ```
 
 ---
