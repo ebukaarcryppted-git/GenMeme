@@ -8,17 +8,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="preload" as="image" href="assets/mochi/1.png" />
-  <link rel="preload" as="image" href="assets/mochi/2.png" />
-  <link rel="preload" as="image" href="assets/mochi/3.png" />
-  <link rel="preload" as="image" href="assets/mochi/4.png" />
-  <link rel="preload" as="image" href="assets/mochi/5.png" />
-  <link rel="preload" as="image" href="assets/mochi/6.png" />
-  <link rel="preload" as="image" href="assets/mochi/7.png" />
-  <link rel="preload" as="image" href="assets/mochi/8.png" />
-  <link rel="preload" as="image" href="assets/mochi/9.png" />
-  <link rel="preload" as="image" href="assets/mochi/10.png" />
-  <link rel="preload" as="image" href="assets/mochi/11.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/1.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/2.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/3.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/4.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/5.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/6.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/7.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/8.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/9.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/10.png" />
+  <link rel="preload" as="image" href="assets/mochi/thumb/11.png" />
   <style>
     :root {
       --bg: #07191E;
@@ -554,6 +554,7 @@ let selMochi = 0;
 const MOCHILIST = Array.from({ length: 11 }, (_, i) => ({
   label: 'Mochi ' + (i + 1),
   src: 'assets/mochi/' + (i + 1) + '.png',
+  thumb: 'assets/mochi/thumb/' + (i + 1) + '.png',
 }));
 const mochiCache = {};
 // transform per mochi: { x, y, scale } — x,y is center in canvas coords; scale multiplies baseScale (fits ~40% canvas width)
@@ -749,7 +750,7 @@ function buildMochiGrid() {
     const d = document.createElement('div');
     d.className = 'mtile' + (i === selMochi ? ' sel' : ''); d.title = m.label;
     const img = document.createElement('img');
-    img.src = m.src;
+    img.src = m.thumb;
     img.alt = m.label; img.loading = 'eager'; img.decoding = 'sync'; img.fetchPriority = 'high';
     d.appendChild(img);
     d.addEventListener('click', () => {
