@@ -8,6 +8,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="assets/mochi/1.png" />
+  <link rel="preload" as="image" href="assets/mochi/2.png" />
+  <link rel="preload" as="image" href="assets/mochi/3.png" />
+  <link rel="preload" as="image" href="assets/mochi/4.png" />
+  <link rel="preload" as="image" href="assets/mochi/5.png" />
+  <link rel="preload" as="image" href="assets/mochi/6.png" />
+  <link rel="preload" as="image" href="assets/mochi/7.png" />
+  <link rel="preload" as="image" href="assets/mochi/8.png" />
+  <link rel="preload" as="image" href="assets/mochi/9.png" />
+  <link rel="preload" as="image" href="assets/mochi/10.png" />
+  <link rel="preload" as="image" href="assets/mochi/11.png" />
   <style>
     :root {
       --bg: #07191E;
@@ -376,7 +387,7 @@
         </div>
 
         <!-- STEP 2 -->
-        <div class="step reveal">
+        <div class="step">
           <div class="step-top">
             <div class="step-no">2</div>
             <div><div class="step-title">Choose Mochi Pose</div><div class="step-sub">Drag &amp; zoom Mochi in the live preview</div></div>
@@ -739,7 +750,7 @@ function buildMochiGrid() {
     d.className = 'mtile' + (i === selMochi ? ' sel' : ''); d.title = m.label;
     const img = document.createElement('img');
     img.src = m.src;
-    img.alt = m.label; img.loading = 'eager'; img.decoding = 'async';
+    img.alt = m.label; img.loading = 'eager'; img.decoding = 'sync'; img.fetchPriority = 'high';
     d.appendChild(img);
     d.addEventListener('click', () => {
       selMochi = i;
@@ -851,9 +862,9 @@ if ('IntersectionObserver' in window) {
 buildMochiGrid();
 drawPlaceholder();
 updateZoomUI();
-MOCHILIST.forEach((m, i) => setTimeout(() => ldImg(m.src).then(img => {
+MOCHILIST.forEach((m, i) => ldImg(m.src).then(img => {
   if (img) { mochiCache[i] = img; if (i === selMochi && photoImg) compose(); else if (i === selMochi) updateZoomUI(); }
-}), i * 80));
+}));
 </script>
 </body>
 </html>
