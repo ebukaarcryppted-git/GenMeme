@@ -8,23 +8,24 @@
 
 ## What It Does
 
-GenMeme is a browser-based meme generator built for [GenLayer](https://www.genlayer.com/) — the Intelligent Blockchain platform. Upload any photo, pick a Mochi pose, then **drag and zoom** Mochi anywhere on your image to compose the perfect meme. Download the result as a PNG, copy it to your clipboard, or share it straight to X.
-
-No backend. No uploads. Everything runs in your browser.
+GenMeme is a browser-based meme generator built for the GenLayer community. It lets anyone compose a shareable meme by overlaying Mochi, GenLayer's official mascot onto any photo, then downloading or sharing the result straight to X or anywhere.
 
 ---
 
 ## Features
 
-- **Photo Upload** — drag-and-drop or click to load any image into the live preview
-- **11 Mochi Poses** — bundled transparent PNGs of GenLayer's official mascot
-- **Drag To Position** — click and drag Mochi anywhere on the canvas
-- **Zoom On Cursor** — mouse wheel zoom anchored on the pointer, plus `+`, `−`, and `Reset` buttons
-- **Per-Pose State** — each Mochi remembers its own position and zoom when you switch
+- **Photo Upload** — Drag-and-drop or click-to-browse; loads instantly into the live canvas
+- **11 Mochi Poses** — Transparent PNGs of GenLayer's mascot, displayed in a static tile grid
+- **Drag To Position** — Click/touch and drag Mochi anywhere on the canvas
+- **Zoom On Cursor** — Mouse wheel zoom anchored to pointer; + / − / Reset toolbar buttons
+- **Per-Pose Memory** — Each Mochi pose remembers its own position and zoom independently
 - **Custom Mochi** — upload your own PNG to use as the overlay
-- **PNG Export** — download at full photo resolution (capped at 1920px)
+- **Meme Text** — Type text directly onto the meme; drag it anywhere on the canvas
+- **Multi-line** — Text	Press Enter to break onto a new line
+- **Text Styling** — 4 color options (white, yellow, green, red) + 4 font sizes (S / M / L / XL)
+- **PNG Download** — Exports at full photo resolution (capped at 1920px)
 - **Copy to Clipboard** — instant paste anywhere
-- **Share on X** — one-click tweet with pre-filled hashtags
+- **Share on X** — Opens a pre-filled tweet with GenLayer hashtags
 
 ---
 
@@ -49,48 +50,6 @@ No backend. No uploads. Everything runs in your browser.
 - Zero gradients · Zero shadows · Transform-only animations
 - Swiss Modernism + Exaggerated Minimalism aesthetic
 - Hairline grid backdrop · Corner tick marks · Infinite marquee ticker
-
----
-
-## How to Run Locally
-
-```bash
-# Clone the repo
-git clone https://github.com/ebukaarcryppted-git/GenMeme.git
-cd GenMeme
-
-# Serve with any static server
-python -m http.server 3333
-# then open http://localhost:3333
-```
-
-No build step. No `npm install`. Open `index.html` through any static server.
-
----
-
-## Adding More Mochi Poses
-
-Drop a new PNG into `assets/mochi/`, named `12.png`, `13.png`, etc. Then:
-
-```bash
-# Strip white backgrounds and tight-crop in place
-python scripts/clean_mochi.py
-```
-
-Finally bump the `length: 11` in the `MOCHILIST` array inside `index.html` to match the new count.
-
----
-
-## Project Structure
-
-```
-GenMeme/
-├── index.html              # entire app — HTML, CSS, and JS in one file
-├── assets/
-│   └── mochi/              # 11 transparent Mochi pose PNGs
-└── scripts/
-    └── clean_mochi.py      # strip white bg + tight-crop helper
-```
 
 ---
 
