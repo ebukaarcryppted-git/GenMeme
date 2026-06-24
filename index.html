@@ -419,7 +419,7 @@
             <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
               <div class="field" style="margin-bottom:12px;">
                 <label>Meme Text</label>
-                <textarea id="meme-text-input" placeholder="Type your meme text… (Shift+Enter for new line)" maxlength="200" autocomplete="off" rows="2" spellcheck="false"></textarea>
+                <textarea id="meme-text-input" placeholder="Type your meme text… (Enter for new line)" maxlength="200" autocomplete="off" rows="2" spellcheck="false" enterkeyhint="enter"></textarea>
               </div>
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                 <span style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w50);margin-right:4px;">Color</span>
@@ -923,9 +923,6 @@ function clearPFP(e) {
 
 // ── TEXT OVERLAY EVENTS ──────────────────────────────────────────────
 const memeTextEl = document.getElementById('meme-text-input');
-memeTextEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) e.preventDefault(); // plain Enter does nothing
-});
 memeTextEl.addEventListener('input', e => {
   memeText = e.target.value;
   if (memeText.trim() && !textTx) ensureTextTransform();
