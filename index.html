@@ -262,6 +262,20 @@
     .foot-bottom p { font-size: 11px; color: var(--w35); }
     .foot-bottom .wagmi { font-family: var(--disp); font-size: 12px; font-weight: 600; letter-spacing: .1em; }
 
+    /* ── TEXT OVERLAY CONTROLS ── */
+    .txt-swatch {
+      width: 22px; height: 22px; border: 2px solid transparent; cursor: pointer; flex-shrink: 0;
+      transition: border-color .15s;
+    }
+    .txt-swatch.sel { border-color: var(--green); box-shadow: 0 0 0 2px var(--bg) inset; }
+    .txt-sz-btn {
+      background: transparent; border: 1px solid var(--line); color: var(--w);
+      font-family: var(--body); font-size: 11px; font-weight: 700; letter-spacing: .06em;
+      padding: 5px 10px; cursor: pointer; transition: border-color .2s, color .2s;
+    }
+    .txt-sz-btn:hover { border-color: var(--green); }
+    .txt-sz-btn.sel { border-color: var(--green); color: var(--green); }
+
     @media (prefers-reduced-motion: reduce) {
       .float { animation: none; }
       .marquee-track { animation: none; }
@@ -400,6 +414,26 @@
               <button class="ghost-btn" onclick="document.getElementById('custom-mochi-file').click()">Upload Custom</button>
             </div>
             <div id="custom-mochi-name" style="font-size:12px;color:var(--w50);margin-top:8px;"></div>
+            <!-- MEME TEXT -->
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);">
+              <div class="field" style="margin-bottom:12px;">
+                <label>Meme Text</label>
+                <input type="text" id="meme-text-input" placeholder="Type your meme text…" maxlength="80" autocomplete="off" />
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w50);margin-right:4px;">Color</span>
+                <button class="txt-swatch sel" data-color="#FFFFFF" style="background:#FFFFFF;" title="White"></button>
+                <button class="txt-swatch" data-color="#FFE000" style="background:#FFE000;" title="Yellow"></button>
+                <button class="txt-swatch" data-color="#02F5A1" style="background:#02F5A1;" title="Spring Green"></button>
+                <button class="txt-swatch" data-color="#FF3D3D" style="background:#FF3D3D;" title="Red"></button>
+                <span style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--w50);margin-left:12px;margin-right:4px;">Size</span>
+                <button class="txt-sz-btn" data-size="48">S</button>
+                <button class="txt-sz-btn sel" data-size="72">M</button>
+                <button class="txt-sz-btn" data-size="96">L</button>
+                <button class="txt-sz-btn" data-size="120">XL</button>
+                <button class="ghost-btn" id="clear-text-btn" style="margin-left:auto;padding:5px 10px;font-size:10px;">Clear</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -560,6 +594,10 @@ const mochiCache = {};
 // transform per mochi: { x, y, scale } — x,y is center in canvas coords; scale multiplies baseScale (fits ~40% canvas width)
 const mochiTx = {};
 const mochiBase = {}; // baseScale per mochi
+let memeText = '';
+let textTx = null; // { x, y } center point in canvas coords
+let textFontSize = 72; // at 1080-wide canvas
+let textColor = '#FFFFFF';
 const GREEN = '#02F5A1', ONYX = '#07191E', WHITE = '#FFFFFF';
 const DISP = 'Space Grotesk';
 
@@ -641,6 +679,7 @@ function compose() {
   } else {
     stEl.textContent = 'LOADING MOCHI';
   }
+  drawText();
   updateZoomUI();
 }
 
@@ -655,6 +694,48 @@ function updateZoomUI() {
   });
 }
 
+// ── TEXT OVERLAY HELPERS ─────────────────────────────────────────────
+function ensureTextTransform() {
+  if (textTx) return;
+  textTx = { x: canvas.width / 2, y: Math.round(canvas.height * 0.85) };
+}
+
+function getTextWidth() {
+  if (!memeText.trim()) return 0;
+  const size = Math.round(textFontSize * canvas.width / 1080);
+  ctx.save();
+  ctx.font = `900 ${size}px 'Space Grotesk', Impact, sans-serif`;
+  const w = ctx.measureText(memeText).width;
+  ctx.restore();
+  return w;
+}
+
+function hitText(p) {
+  if (!memeText.trim() || !textTx) return false;
+  const size = Math.round(textFontSize * canvas.width / 1080);
+  const w = getTextWidth();
+  const pad = size * 0.35;
+  return p.x >= textTx.x - w / 2 - pad && p.x <= textTx.x + w / 2 + pad
+      && p.y >= textTx.y - size - pad  && p.y <= textTx.y + pad;
+}
+
+function drawText() {
+  if (!memeText.trim()) return;
+  ensureTextTransform();
+  const size = Math.round(textFontSize * canvas.width / 1080);
+  ctx.save();
+  ctx.font = `900 ${size}px 'Space Grotesk', Impact, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = Math.max(2, size * 0.09);
+  ctx.strokeStyle = 'rgba(0,0,0,0.82)';
+  ctx.strokeText(memeText, textTx.x, textTx.y);
+  ctx.fillStyle = textColor;
+  ctx.fillText(memeText, textTx.x, textTx.y);
+  ctx.restore();
+}
+
 // ── DRAG + ZOOM HANDLERS ─────────────────────────────────────────────
 const ZOOM_MIN = 0.15, ZOOM_MAX = 4;
 function canvasPos(ev) {
@@ -663,16 +744,30 @@ function canvasPos(ev) {
   return { x: (ev.clientX - r.left) * sx, y: (ev.clientY - r.top) * sy };
 }
 let drag = null;
+let textDrag = null;
 canvas.addEventListener('pointerdown', ev => {
-  if (!photoImg || !mochiCache[selMochi]) return;
-  ensureMochiTransform(selMochi);
+  if (!photoImg) return;
   const p = canvasPos(ev);
+  // text hit-test takes priority
+  if (memeText.trim() && textTx && hitText(p)) {
+    textDrag = { ox: p.x - textTx.x, oy: p.y - textTx.y };
+    canvas.classList.add('grabbing');
+    canvas.setPointerCapture(ev.pointerId);
+    return;
+  }
+  if (!mochiCache[selMochi]) return;
+  ensureMochiTransform(selMochi);
   const tx = mochiTx[selMochi];
   drag = { ox: p.x - tx.x, oy: p.y - tx.y };
   canvas.classList.add('grabbing');
   canvas.setPointerCapture(ev.pointerId);
 });
 canvas.addEventListener('pointermove', ev => {
+  if (textDrag) {
+    const p = canvasPos(ev);
+    textTx.x = p.x - textDrag.ox; textTx.y = p.y - textDrag.oy;
+    compose(); return;
+  }
   if (!drag) return;
   const p = canvasPos(ev);
   const tx = mochiTx[selMochi];
@@ -680,6 +775,12 @@ canvas.addEventListener('pointermove', ev => {
   compose();
 });
 function endDrag(ev) {
+  if (textDrag) {
+    textDrag = null;
+    canvas.classList.remove('grabbing');
+    try { canvas.releasePointerCapture(ev.pointerId); } catch (e) {}
+    return;
+  }
   if (!drag) return;
   drag = null;
   canvas.classList.remove('grabbing');
@@ -777,9 +878,10 @@ function loadPhoto(file) {
     const img = new Image();
     img.onload = () => {
       photoImg = img;
-      // reset all mochi transforms so they re-init relative to new canvas dims
+      // reset all mochi + text transforms so they re-init relative to new canvas dims
       for (const k in mochiTx) delete mochiTx[k];
       for (const k in mochiBase) delete mochiBase[k];
+      textTx = null;
       showPhoto(e.target.result);
       compose();
     };
@@ -798,10 +900,39 @@ function clearPFP(e) {
   photoImg = null; pfpFile.value = '';
   for (const k in mochiTx) delete mochiTx[k];
   for (const k in mochiBase) delete mochiBase[k];
+  textTx = null;
   document.getElementById('pfp-ph').style.display = 'block';
   document.getElementById('pfp-prev').style.display = 'none';
   compose();
 }
+
+// ── TEXT OVERLAY EVENTS ──────────────────────────────────────────────
+document.getElementById('meme-text-input').addEventListener('input', e => {
+  memeText = e.target.value;
+  if (memeText.trim() && !textTx) ensureTextTransform();
+  compose();
+});
+document.querySelectorAll('.txt-swatch').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.txt-swatch').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    textColor = btn.dataset.color;
+    compose();
+  });
+});
+document.querySelectorAll('.txt-sz-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.txt-sz-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    textFontSize = +btn.dataset.size;
+    compose();
+  });
+});
+document.getElementById('clear-text-btn').addEventListener('click', () => {
+  memeText = ''; textTx = null;
+  document.getElementById('meme-text-input').value = '';
+  compose();
+});
 
 // ── CUSTOM MOCHI UPLOAD ──────────────────────────────────────────────
 document.getElementById('custom-mochi-file').addEventListener('change', e => {
